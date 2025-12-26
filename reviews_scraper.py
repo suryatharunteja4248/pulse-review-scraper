@@ -5,9 +5,6 @@ from dateutil import parser as date_parser
 from bs4 import BeautifulSoup
 import argparse
 
-
-# ---------------- TRUSTPILOT SCRAPER (Primary Source) ---------------- #
-
 def scrape_capterra_reviews(product_url, start_date, end_date):
     reviews = []
     page = 1
@@ -27,7 +24,7 @@ def scrape_capterra_reviews(product_url, start_date, end_date):
         response = requests.get(url, headers=headers, timeout=15)
 
         if response.status_code != 200:
-            print(f"❌ Failed to fetch page (status {response.status_code})")
+            print(f" Failed to fetch page (status {response.status_code})")
             break
 
         soup = BeautifulSoup(response.text, "html.parser")
@@ -39,15 +36,11 @@ def scrape_capterra_reviews(product_url, start_date, end_date):
             break
 
         for card in review_cards:
-
-            # ---------- Title Extraction (Multiple fallback selectors) ----------
             title_tag = (
                 card.find("h2") or
                 card.find("a", {"data-review-title-typography": True}) or
                 card.find("h3")
             )
-
-            # ---------- Review Body Extraction (Multiple fallback selectors) ----------
             body_tag = (
                 card.find("p", {"data-service-review-text-typography": True}) or
                 card.find("p", {"class": "typography_body-l__KUYFJ"}) or
@@ -62,7 +55,6 @@ def scrape_capterra_reviews(product_url, start_date, end_date):
             except:
                 continue
 
-            # Date filter
             if not (start_date <= review_date <= end_date):
                 continue
 
@@ -74,26 +66,18 @@ def scrape_capterra_reviews(product_url, start_date, end_date):
 
         page += 1
 
-    print(f"✅ Trustpilot reviews collected: {len(reviews)}")
+    print(f" Trustpilot reviews collected: {len(reviews)}")
     return reviews
 
-
-# ---------------- OPTIONAL G2 PLACEHOLDER (Not Used) ---------------- #
-
 def scrape_g2_reviews(company, start_date, end_date):
-    # G2 blocks automated scraping in many regions — placeholder only
     return []
 
-
-# ---------------- SAVE JSON ---------------- #
 
 def save_to_json(data, filename="reviews.json"):
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
-    print(f"\n💾 Output saved to {filename}\n")
+    print(f"\n Output saved to {filename}\n")
 
-
-# ---------------- MAIN ---------------- #
 
 def main():
     parser = argparse.ArgumentParser(description="Pulse Assignment – Review Scraper")
